@@ -16,4 +16,3 @@ MONGO_URI = DB_URI
 DB_NAME = os.environ.get("DATABASE_NAME", "Cluster0")
 OWNER_IDS = [int(x) for x in os.getenv("OWNER_IDS", "7024087501").split(",") if x.strip()]
 DB_CHANNEL_ID = int(os.getenv("DB_CHANNEL_ID", "-1002342989997"))
->>>>>>> 80f862b (Save local changes before pull)
