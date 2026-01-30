@@ -25,7 +25,7 @@ from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 API_ID = 123456                  # from my.telegram.org
 API_HASH = "YOUR_API_HASH"       # from my.telegram.org
 BOT_TOKEN = "123456:ABC-DEF..."  # Bot token from BotFather
-MONGO_URI = "mongodb://127.0.0.1:27017"  # or Atlas URI
+MONGO_URI = "mongodb+srv://alpmanas56_db_user:njoXL0eSLLVsE5rH@cluster0.fi3wrdi.mongodb.net/?appName=Cluster0"  # or Atlas URI
 OWNER_IDS = [111111111]          # list of owner/admin Telegram user IDs (integers)
 DB_CHANNEL_ID = -1001234567890   # private channel id where stories are posted (bot must be admin)
 # --------------------------------------------------------
