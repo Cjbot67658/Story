@@ -254,7 +254,7 @@ async def admin_cb(client, cbq):
 
 # ----------------- ADMIN MESSAGES: title, photo, desc, episode link flows -----------------
 # Title handler (admin)
-@app.on_message(filters.private & filters.text & ~filters.command)
+@app.on_message(filters.private & filters.text & ~filters.command(["start", "help"]))
 async def admin_texts(client, message):
     s = sessions_col.find_one({"_id": message.from_user.id})
     # No session -> might be normal user flows (handled earlier)
