@@ -125,6 +125,11 @@ async def menu_cb(client, cbq):
     else:
         await cbq.answer("Unknown menu action.")
 
+# example in bot.py
+def run_bot():
+    # agar tum Pyrogram ya aiogram use kar rahe ho, call the start method here
+    app.run()      # ya app.start(), app.start_polling(), client.run(), etc.
+
 # ----------------- CATEGORY & STORY LISTING -----------------
 @app.on_callback_query(filters.regex(r"^CAT\|"))
 async def cat_open_cb(client, cbq):
