@@ -186,7 +186,7 @@ async def listen_cb(client, cbq):
     await cbq.message.reply_text(f"You chose {vision_id}. Please send episode in format: Ep10 or Ep1-50 (case-sensitive 'Ep').", reply_markup=back_kb("MENU|MAIN"))
 
 # Text handlers: non-command flow (use call to command() to invert)
-@app.on_message(filters.private & filters.text & ~filters.command())
+@app.on_message(filters.private & filters.text & ~filters.command([]))
 async def text_handler(client, message):
     text = message.text or ""
     if text.startswith(("/", "!", ".")):
