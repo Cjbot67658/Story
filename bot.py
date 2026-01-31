@@ -1,3 +1,6 @@
+@app.on_message(filters.private & filters.command("test"))
+async def test_handler(client, message):
+    await message.reply("✅ Bot alive hai bhai")
 # bot.py (clean single-file entrypoint)
 import os
 import time
