@@ -153,7 +153,14 @@ async def listen_cb(client, cbq):
     users_col.update_one({"_id": cbq.from_user.id}, {"$set": {"last_story": vision_id}}, upsert=True)
     await cbq.message.reply_text(f"You chose {vision_id}. Please send episode in format: Ep10 or Ep1-50 (case-sensitive 'Ep').", reply_markup=back_kb("MENU|MAIN"))
 
-@app.on_message(filters.private & filters.text & ~filters.command)
+@app.on_message(filters.private & filters.text)
+def handle_message(client, message):
+    text = message.text or ""
+    # ignore messages that look like commands
+    if text.startswith(("/", "!", ".")):
+        return
+
+    # proceed with non-command text handling...
 async def ep_request_handler(client, message):
     text = message.text.strip()
     # If text matches Ep format exactly
