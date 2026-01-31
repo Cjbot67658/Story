@@ -92,7 +92,7 @@ async def broadcast_cmd(client, message):
         await message.reply_text("You are not authorized to run broadcast.")
 
 # Handle plain text messages that are NOT commands:
-@app.on_message(filters.private & filters.text & ~filters.command())
+@app.on_message(filters.private & filters.text & ~filters.command)
 async def text_handler(client, message):
     text = message.text or ""
     # ignore messages starting with typical command characters (double-safety)
