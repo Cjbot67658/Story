@@ -260,6 +260,10 @@ async def admin_cb(client, cbq):
 # ----------------- ADMIN MESSAGES: title, photo, desc, episode link flows -----------------
 # Title handler (admin)
 @app.on_message(filters.private & filters.text & ~filters.command(["start", "help"]))
+async def title_handler(client, message):
+    # message here is guaranteed to be text and NOT the listed commands
+    text = message.text or ""
+    # your logic here
 async def admin_texts(client, message):
     s = sessions_col.find_one({"_id": message.from_user.id})
     # No session -> might be normal user flows (handled earlier)
