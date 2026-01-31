@@ -1,7 +1,7 @@
 # web_and_bot.py (example)
 from flask import Flask
 from threading import Thread
-from bot import run_bot  # assume bot.py defines a run_bot() or similar entrypoint
+ffrom bot import start_bot as run_bot # assume bot.py defines a run_bot() or similar entrypoint
 import os
 
 app = Flask(__name__)
