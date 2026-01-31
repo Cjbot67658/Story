@@ -14,21 +14,123 @@ Features:
 - Posts new story (photo+caption) to a DB channel (DB_CHANNEL_ID)
 """
 
-import re
-import time
+# bot.py (combined single-file entrypoint)
+import os
 import logging
+import time
+import re
+
 from pymongo import MongoClient, ReturnDocument
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
-# ----------------- CONFIG: REPLACE THESE -----------------
-API_ID = 123456                  # from my.telegram.org
-API_HASH = "YOUR_API_HASH"       # from my.telegram.org
-BOT_TOKEN = "123456:ABC-DEF..."  # Bot token from BotFather
-MONGO_URI = "mongodb+srv://Profiledata:dhbh5fgnnk8ygvhnj7@cluster0.fi3wrdi.mongodb.net/?appName=Cluster0"          # or Atlas UR
-OWNER_IDS = [111111111]          # list of owner/admin Telegram user IDs (integers)
-DB_CHANNEL_ID = -1001234567890   # private channel id where stories are posted (bot must be admin)
-# --------------------------------------------------------
+# ----------------- CONFIG: use environment variables with safe defaults -----------------
+API_ID = int(os.environ.get("API_ID", "123456"))                # from my.telegram.org
+API_HASH = os.environ.get("API_HASH", "YOUR_API_HASH")         # from my.telegram.org
+BOT_TOKEN = os.environ.get("BOT_TOKEN", "123456:ABC-DEF...")   # Bot token from BotFather
+
+# NOTE: prefer setting MONGO_URI as an env var on your host (Koyeb/Railway).
+# For Termux local testing you may need the non-SRV (mongodb://...) form — see notes below.
+MONGO_URI = os.environ.get(
+    "MONGO_URI",
+    "mongodb+srv://Profiledata:dhbh5fgnnk8ygvhnj7@cluster0.fi3wrdi.mongodb.net/?appName=Cluster0"
+)
+
+OWNER_IDS = [int(x) for x in os.environ.get("OWNER_IDS", "111111111").split(",") if x.strip()]
+DB_CHANNEL_ID = int(os.environ.get("DB_CHANNEL_ID", "-1001234567890"))
+
+# -----------------------------------------------------------------------------------------
+
+# Configure logging (adjust level if you want more/less logs)
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)s | %(message)s"
+)
+logger = logging.getLogger(__name__)
+
+# Initialize MongoDB client and database handle
+mc = None
+db = None
+try:
+    if MONGO_URI:
+        mc = MongoClient(MONGO_URI)
+        # If you want a specific database name, either parse from URI or set here:
+        # db = mc.get_database("your_db_name")
+        # For Atlas default you might want to set a DB name via env var:
+        DB_NAME = os.environ.get("DB_NAME", None)
+        if DB_NAME:
+            db = mc[DB_NAME]
+        else:
+            # fallback to 'test' or the default database from URI
+            db = mc.get_database()
+        logger.info("Connected to MongoDB")
+except Exception as e:
+    logger.warning(f"Could not connect to MongoDB at startup: {e}")
+    # keep db = None; handlers should handle missing DB gracefully
+
+# Create Pyrogram client
+app = Client("storybot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
+
+
+# -------------------------
+# Example handlers (minimal)
+# You may already have handlers in a separate module; if so, call register_handlers(app, db) instead.
+# The following are small example handlers so this file is runnable out-of-the-box.
+# Replace / extend with your real handlers or keep them in separate files and import/register.
+# -------------------------
+
+@app.on_message(filters.private & filters.command("start"))
+async def start_cmd(client, message):
+    await message.reply_text("Hello — bot is up and running!")
+
+@app.on_message(filters.private & filters.command("broadcast"))
+async def broadcast_cmd(client, message):
+    # placeholder: owner-only broadcast
+    if message.from_user and message.from_user.id in OWNER_IDS:
+        await message.reply_text("Broadcast command received. (implement your logic)")
+    else:
+        await message.reply_text("You are not authorized to run broadcast.")
+
+# Handle plain text messages that are NOT commands:
+@app.on_message(filters.private & filters.text & ~filters.command())
+async def text_handler(client, message):
+    text = message.text or ""
+    # ignore messages starting with typical command characters (double-safety)
+    if text.startswith(("/", "!", ".")):
+        return
+    # Example reply
+    await message.reply_text(f"You said: {text}")
+
+# Add more handlers as needed...
+# e.g. @app.on_message(filters.private & filters.command(["Fantasy", "Sifi", "Love"]))
+
+
+# -------------------------
+# run_bot() function to be imported by web_and_bot.py
+# -------------------------
+def run_bot():
+    """
+    Register any external handlers here (if you keep them in other modules),
+    then start the Pyrogram client. This function is safe to import.
+    """
+    # If you use a handlers module: from handlers import register_handlers; register_handlers(app, db)
+    # Example:
+    # try:
+    #     from handlers import register_handlers
+    #     register_handlers(app, db)
+    # except Exception:
+    #     logger.info("No external handlers found; running built-in handlers.")
+
+    logger.info("Starting Pyrogram client...")
+    app.run()
+
+
+if __name__ == "__main__":
+    # Running directly: start the bot (useful for local dev)
+    try:
+        run_bot()
+    except Exception as exc:
+        logger.exception("Bot crashed: %s", exc)
 
 # Regex for Ep format (case-sensitive: 'Ep' exactly)
 EP_RE = re.compile(r"^Ep(\d+)(?:-(\d+))?$")
