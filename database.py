@@ -1,16 +1,26 @@
-import os
-from pymongo import MongoClient, ReturnDocument
+import pymongo, os
+from config import DB_URI, DB_NAME
 
-MONGO_URI = os.environ.get("MONGO_URI", "mongodb://localhost:27017")
-DB_NAME = os.environ.get("DB_NAME", "storybot")
-mc = MongoClient(MONGO_URI)
-db = mc[DB_NAME]
+dbclient = pymongo.MongoClient(DB_URI)
+database = dbclient[DB_NAME]
+user_data = database['users']
 
-def increment_category_counter(category_id, code):
-    res = db.categories.find_one_and_update(
-        {"_id": category_id},
-        {"$inc": {"count": 1}, "$setOnInsert": {"code": code, "name": category_id}},
-        upsert=True,
-        return_document=ReturnDocument.AFTER
-    )
-    return res
+async def present_user(user_id : int):
+    found = user_data.find_one({'_id': user_id})
+    return bool(found)
+
+async def add_user(user_id: int):
+    user_data.insert_one({'_id': user_id})
+    return
+
+async def full_userbase():
+    user_docs = user_data.find()
+    user_ids = []
+    for doc in user_docs:
+        user_ids.append(doc['_id'])
+        
+    return user_ids
+
+async def del_user(user_id: int):
+    user_data.delete_one({'_id': user_id})
+    return
